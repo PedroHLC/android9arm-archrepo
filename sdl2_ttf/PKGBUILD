@@ -1,0 +1,48 @@
+_target=android-9-arm
+_sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
+_pkgname=sdl2_ttf
+
+pkgname=${_target}-${_pkgname}
+pkgver=2.0.12
+pkgrel=1
+pkgdesc="A library that allows you to use TrueType fonts in your SDL applications - Version 2 (${_target})"
+arch=('any')
+url="http://www.libsdl.org"
+license=('MIT')
+depends=("${_target}-sdl2")
+makedepends=('android-ndk' cmake)
+options=(!libtool)
+source=("http://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-${pkgver}.tar.gz")
+md5sums=('79787216b56cb4707f39d538f2225e00')
+
+prepare() {
+  cd "${srcdir}/SDL2_ttf-${pkgver}/"
+  
+  ln -s "${_sysroot}/include/SDL2/"* ./ -f
+  sed 's/include\ $(CLEAR_VARS)/include\ $(CLEAR_VARS)\
+LOCAL_LDLIBS\ :=\ -lSDL2\
+LOCAL_SHARED_LIBRARIES\ :=\ SDL2/' < Android.mk > _Android.mk
+  
+  sed 's/include\ $(BUILD_SHARED_LIBRARY)/include\ $(BUILD_STATIC_LIBRARY)/g' < _Android.mk > Android_static.mk
+}
+
+build() {
+  cd "${srcdir}/SDL2_ttf-${pkgver}/" 
+  
+  ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android_static.mk APP_PLATFORM=android-9
+  ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./_Android.mk APP_PLATFORM=android-9
+}
+
+package() {
+  srcdirfull="${srcdir}/SDL2_ttf-${pkgver}"
+  pkgdirfull="$pkgdir/${_sysroot}"
+  
+  mkdir -p "${pkgdirfull}"
+  cd "${pkgdirfull}"
+  mkdir -p "./lib" "./include/SDL2"
+  install -m644 "${srcdirfull}/SDL_ttf.h" ./include/SDL2/
+  install -m644 "${srcdirfull}/libs/armeabi/"*.so ./lib/
+  install -m644 "${srcdirfull}/obj/local/armeabi/"libSDL2*.a ./lib/
+
+  #install -Dm644 COPYING.txt "${pkgdirfull}/share/licenses/${_pkgname}/LICENSE"
+}

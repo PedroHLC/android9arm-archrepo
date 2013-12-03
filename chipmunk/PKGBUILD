@@ -1,0 +1,69 @@
+# Created by: PedroHLC
+
+_target=arm-linux-androideabi
+_title=android-9-arm
+_sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
+_pkgname=chipmunk
+
+pkgname="${_title}-${_pkgname}"
+pkgver=6.2.0
+pkgrel=2
+pkgdesc="A high-performance 2D rigid body physics library (${_target})"
+arch=('any')
+url="http://chipmunk-physics.net/"
+license=('MIT')
+makedepends=('android-ndk' make)
+source=(http://files.slembcke.net/chipmunk/release/Chipmunk-6.x/Chipmunk-${pkgver}.tgz)
+md5sums=('42c63539976b84f5f643fc0acb1b7127')
+options=(!buildflags !strip !makeflags)
+
+build() {
+	cd "${srcdir}/Chipmunk-$pkgver"
+  
+  export NDK=/opt/android-ndk
+  export SYSROOT=$NDK/platforms/android-9/arch-arm
+  export PKG_CONFIG_PATH="${_sysroot}/lib/pkgconfig"
+  export CFLAGS='-march=armv5'
+  export LDFLAGS='-Wl,--fix-cortex-a8'
+  export CXXFLAGS="$CFLAGS -I\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/include\" \
+  -I\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/include\" \
+  -L\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi\""
+  
+  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-x86"
+  export CC="${_toolchainroot}/bin/${_target}-gcc --sysroot=$SYSROOT"
+  export CXX="${_toolchainroot}/bin/${_target}-g++ --sysroot=$SYSROOT"
+  export CPP="${_toolchainroot}/bin/${_target}-cpp --sysroot=$SYSROOT"
+  export STRIP="${_toolchainroot}/bin/${_target}-strip"
+  export AR="${_toolchainroot}/bin/${_target}-ar"
+  export LD="${_toolchainroot}/bin/${_target}-ld"
+  export RANLIB="${_toolchainroot}/bin/${_target}-ranlib"
+	
+	$CC \
+		-std=gnu99 \
+		-Iinclude/chipmunk \
+		-O3 -DNDEBUG -ffast-math \
+		src/*.c src/constraints/*.c \
+		-c
+	"$AR"  rcs libchipmunk.a ./cp*.o
+	
+	$CC \
+		-std=gnu99 \
+		-Iinclude/chipmunk \
+		-O3 -DNDEBUG -ffast-math \
+		src/*.c src/constraints/*.c \
+		-shared \
+		-o libchipmunk.so
+}
+
+package() {
+	cd "${pkgdir}"
+	
+	mkdir -p "./${_sysroot}/lib"
+	mkdir -p "./${_sysroot}/share/doc/chipmunk"
+	cp -r "$srcdir/Chipmunk-$pkgver/include" "./${_sysroot}/"
+	cp -r "$srcdir/Chipmunk-$pkgver/doc" "./${_sysroot}/share/doc/chipmunk/"
+	mv "./${_sysroot}/share/doc/chipmunk/doc" "./${_sysroot}/share/doc/chipmunk/html/"
+	cp "$srcdir/Chipmunk-$pkgver/libchipmunk.so" "./${_sysroot}/lib/"
+	cp "$srcdir/Chipmunk-$pkgver/libchipmunk.a" "./${_sysroot}/lib/"
+	"$STRIP" "./${_sysroot}/lib/"*.so*
+}

@@ -1,0 +1,49 @@
+_target=android-9-arm
+_sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
+
+_pkgname=sdl2_mixer
+pkgname=${_target}-${_pkgname}
+pkgver=2.0.0
+pkgrel=2
+pkgdesc="A simple multi-channel audio mixer - Version 2 (${_target})"
+arch=('any')
+url="http://www.libsdl.org/projects/SDL_image/"
+license=('ZLIB')
+depends=("${_target}-sdl2")
+makedepends=('android-ndk' cmake)
+conflicts=("${_target}-${_pkgname}")
+options=(!libtool !strip !buildflags)
+source=("http://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-${pkgver}.tar.gz")
+md5sums=('65f6d80df073a1fb3bb537fbda031b50')
+
+prepare() {
+  cd "${srcdir}/SDL2_mixer-${pkgver}/"
+  
+  ln -s "${_sysroot}/include/SDL2/"* ./ -f
+  sed \
+  -e 's/LOCAL_LDLIBS\ :=/LOCAL_LDLIBS\ :=\ -lSDL2/'\
+  -e 's/SUPPORT_MOD_MIKMOD\ :=\ true/SUPPORT_MOD_MIKMOD\ :=\ false/' \
+  -e 's/SUPPORT_MP3_SMPEG\ :=\ true/SUPPORT_MP3_SMPEG\ :=\ false/' \
+  < Android.mk > _Android.mk
+  
+  sed 's/include\ $(BUILD_SHARED_LIBRARY)/include\ $(BUILD_STATIC_LIBRARY)/g' < _Android.mk > Android_static.mk
+}
+
+build() {
+  cd "${srcdir}/SDL2_mixer-${pkgver}/"
+  
+  ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android_static.mk APP_PLATFORM=android-9
+  ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./_Android.mk APP_PLATFORM=android-9
+}
+
+package() {
+  srcdirfull="${srcdir}/SDL2_mixer-${pkgver}"
+  pkgdirfull="$pkgdir/${_sysroot}"
+  
+  mkdir -p "${pkgdirfull}"
+  cd "${pkgdirfull}"
+  mkdir -p "./lib" "./include/SDL2"
+  install -m644 "${srcdirfull}/SDL_mixer.h" ./include/SDL2/
+  install -m644 "${srcdirfull}/libs/armeabi/"*.so ./lib/
+  install -m644 "${srcdirfull}/obj/local/armeabi/"libSDL2*.a ./lib/
+}

@@ -1,0 +1,54 @@
+# Created by: PedroHLC
+# This one is useless, NDK already have zlib
+
+_target=arm-linux-androideabi
+_title=android-9-arm
+_sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
+_pkgname=zlib
+
+pkgname="${_title}-${_pkgname}"
+pkgver=1.2.8
+pkgrel=1
+arch=('any')
+license=('custom')
+pkgdesc="A compression/decompression Library (${_target}) - include static and shared librarys"
+#groups=('arm-elf-dev')
+makedepends=('android-ndk' make)
+provides=("${pkgname}-static")
+conflicts=($provides 'android-ndk')
+url="http://www.zlib.net/"
+source=("http://www.zlib.net/zlib-${pkgver}.tar.gz")
+options=(!strip !buildflags)
+md5sums=('44d667c142d7cda120332623eab69f40')
+
+build()
+{
+  cd $srcdir/zlib-$pkgver
+  
+  export NDK=/opt/android-ndk
+  export SYSROOT=$NDK/platforms/android-9/arch-arm
+  export PKG_CONFIG_PATH="${_sysroot}/lib/pkgconfig"
+  export CFLAGS='-march=armv5' 
+  export LDFLAGS='-Wl,--fix-cortex-a8'
+  
+  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-x86"
+  export CC="${_toolchainroot}/bin/${_target}-gcc --sysroot=$SYSROOT"
+  export STRIP="${_toolchainroot}/bin/${_target}-strip"
+  export AR="${_toolchainroot}/bin/${_target}-ar"
+  export LD="${_toolchainroot}/bin/${_target}-ld"
+  export RANLIB="${_toolchainroot}/bin/${_target}-ranlib" 
+  
+  ./configure --prefix=${_sysroot} -static -shared
+  make
+
+  grep -A 24 '^  Copyright' zlib.h > LICENSE
+}
+
+package()
+{
+  cd ${srcdir}/zlib-$pkgver
+  make install DESTDIR=${pkgdir}
+  install -D -m644 LICENSE ${pkgdir}/${_sysroot}/share/licenses/zlib/LICENSE
+  rm -r "$pkgdir/${_sysroot}/share/man"
+  "$STRIP" "$pkgdir/${_sysroot}/lib/"*.so*
+}

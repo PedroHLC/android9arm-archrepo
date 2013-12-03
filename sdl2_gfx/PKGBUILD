@@ -1,0 +1,42 @@
+_target=android-9-arm
+_sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
+
+_pkgname=sdl2_gfx
+pkgname=${_target}-${_pkgname}
+pkgver=5
+pkgrel=2
+pkgdesc="A simple multi-channel audio mixer - Version 2 (${_target})"
+arch=('any')
+url="ttp://www.ferzkopp.net/joomla/software-mainmenu-14/4-ferzkopps-linux-software/19-sdlgfx"
+license=('ZLIB')
+depends=("${_target}-sdl2")
+makedepends=('android-ndk' cmake)
+options=(!libtool !strip !buildflags)
+source=("sdl2-gfx::svn://svn.code.sf.net/p/sdl2gfx/code/trunk#revision=$pkgver"
+	'Android.mk')
+md5sums=('SKIP' 'SKIP')
+
+prepare() {
+  cd "${srcdir}/"
+  
+  sed 's/include\ $(BUILD_SHARED_LIBRARY)/include\ $(BUILD_STATIC_LIBRARY)/' < Android.mk > Android_static.mk
+}
+
+build() {
+  cd "${srcdir}/sdl2-gfx/"
+  
+  ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=../Android_static.mk APP_PLATFORM=android-9
+  ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=../Android.mk APP_PLATFORM=android-9
+}
+
+package() {
+  srcdirfull="${srcdir}/sdl2-gfx"
+  pkgdirfull="$pkgdir/${_sysroot}"
+  
+  mkdir -p "${pkgdirfull}"
+  cd "${pkgdirfull}"
+  mkdir -p "./lib" "./include/SDL2"
+  install -m644 "${srcdirfull}/SDL2_"*.h ./include/SDL2/
+  install -m644 "${srcdirfull}/libs/armeabi/"*.so ./lib/
+  install -m644 "${srcdirfull}/obj/local/armeabi/"*.a ./lib/
+}

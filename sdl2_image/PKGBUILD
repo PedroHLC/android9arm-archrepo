@@ -1,0 +1,47 @@
+_target=android-9-arm
+_sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
+
+_pkgname=sdl2_image
+pkgname=${_target}-${_pkgname}
+pkgver=2.0.0
+pkgrel=2
+pkgdesc="A simple library to load images of various formats as SDL surfaces - Version 2 (${_target})"
+arch=('any')
+url="http://www.libsdl.org/projects/SDL_image/"
+license=('ZLIB')
+depends=("${_target}-sdl2")
+makedepends=('android-ndk' cmake)
+options=(!libtool !strip !buildflags)
+source=("http://www.libsdl.org/projects/SDL_image/release/SDL2_image-${pkgver}.tar.gz")
+sha1sums=('20b1b0db9dd540d6d5e40c7da8a39c6a81248865')
+
+prepare() {
+  cd "${srcdir}/SDL2_image-${pkgver}/"
+  
+  ln -s "${_sysroot}/include/SDL2/"* ./ -f
+  sed \
+  -e 's/LOCAL_LDLIBS\ :=/LOCAL_LDLIBS\ :=\ -lSDL2/'\
+  -e 's/SUPPORT_WEBP\ :=\ true/SUPPORT_WEBP\ :=\ false/' \
+  < Android.mk > _Android.mk
+  
+  sed 's/include\ $(BUILD_SHARED_LIBRARY)/include\ $(BUILD_STATIC_LIBRARY)/' < _Android.mk > Android_static.mk
+}
+
+build() {
+  cd "${srcdir}/SDL2_image-${pkgver}/"
+  
+  ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android_static.mk APP_PLATFORM=android-9
+  ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./_Android.mk APP_PLATFORM=android-9
+}
+
+package() {
+  srcdirfull="${srcdir}/SDL2_image-${pkgver}"
+  pkgdirfull="$pkgdir/${_sysroot}"
+  
+  mkdir -p "${pkgdirfull}"
+  cd "${pkgdirfull}"
+  mkdir -p "./lib" "./include/SDL2"
+  install -m644 "${srcdirfull}/SDL_image.h" ./include/SDL2/
+  install -m644 "${srcdirfull}/libs/armeabi/"*.so ./lib/
+  install -m644 "${srcdirfull}/obj/local/armeabi/"*.a ./lib/
+}

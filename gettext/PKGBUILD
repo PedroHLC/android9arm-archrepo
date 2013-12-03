@@ -1,0 +1,69 @@
+# Created by: PedroHLC
+
+_target=arm-linux-androideabi
+_title=android-9-arm
+_sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
+_pkgname=gettext
+
+pkgname="${_title}-${_pkgname}"
+pkgver=0.18.3.1
+pkgrel=1
+arch=(any)
+pkgdesc="GNU internationalization library (${_target})"
+depends=(${_title}-libiconv)
+makedepends=('android-ndk' make)
+options=(!strip !buildflags !libtool)
+license=('GPL' 'LGPL')
+url="http://www.gnu.org/software/gettext/"
+source=("http://ftp.gnu.org/pub/gnu/gettext/gettext-$pkgver.tar.gz"{,.sig} 'msginit_fix.patch')
+md5sums=('3fc808f7d25487fc72b5759df7419e02' 'SKIP' '679205431aa57ae687035a04cbef1741')
+
+prepare() {
+  cd "$srcdir/gettext-$pkgver/gettext-tools/src/"
+  
+  patch -i "$srcdir/msginit_fix.patch" -p0
+}
+
+build() {
+  cd "$srcdir/gettext-$pkgver"
+  
+  export NDK=/opt/android-ndk
+  export SYSROOT=$NDK/platforms/android-9/arch-arm
+  export PKG_CONFIG_PATH="${_sysroot}/lib/pkgconfig"
+  export CFLAGS='-march=armv5'
+  export LDFLAGS='-Wl,--fix-cortex-a8'
+  export CXXFLAGS="$CFLAGS -I\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/include\" \
+  -I\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/include\" \
+  -L\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi\""
+  
+  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-x86"
+  export CC="${_toolchainroot}/bin/${_target}-gcc --sysroot=$SYSROOT"
+  export CXX="${_toolchainroot}/bin/${_target}-g++ --sysroot=$SYSROOT"
+  export CPP="${_toolchainroot}/bin/${_target}-cpp --sysroot=$SYSROOT"
+  export STRIP="${_toolchainroot}/bin/${_target}-strip"
+  export AR="${_toolchainroot}/bin/${_target}-ar"
+  export LD="${_toolchainroot}/bin/${_target}-ld"
+  export RANLIB="${_toolchainroot}/bin/${_target}-ranlib"
+  
+  ./configure \
+	--prefix="${_sysroot}" --host=arm-linux-gnueabi \
+	--enable-shared --enable-static \
+	--enable-threads \
+	--with-included-regex \
+	--cache-file=arm.cache \
+	--disable-java --disable-openmp --without-libiconv-prefix --without-libintl-prefix --without-libglib-2.0-prefix --without-libcroco-0.6-prefix --with-included-libxml --without-libncurses-prefix --without-libtermcap-prefix --without-libcurses-prefix --without-libexpat-prefix --without-emacs
+  make
+}
+
+
+package() {
+  cd "$srcdir/gettext-$pkgver"
+  make DESTDIR="${pkgdir}" install
+  rm -r "$pkgdir/${_sysroot}/bin"
+  rm -r "$pkgdir/${_sysroot}/lib/gettext"
+  rm "$pkgdir/${_sysroot}/lib/charset.alias"
+  rm "$pkgdir/${_sysroot}/lib/GNU.Gettext.dll"
+  rm "$pkgdir/${_sysroot}/share/info/dir"
+  rm -r "$pkgdir/${_sysroot}/share/man"
+  "$STRIP" "$pkgdir/${_sysroot}/lib/"*.so*
+}

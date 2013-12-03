@@ -1,0 +1,59 @@
+# Created by: PedroHLC
+
+_target=arm-linux-androideabi
+_title=android-9-arm
+_sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
+_pkgname=faad2
+
+pkgname="${_title}-${_pkgname}"
+pkgver=2.7
+pkgrel=3
+pkgdesc="ISO AAC audio decoder LIBRARY (${_target})"
+arch=('any')
+url="http://www.audiocoding.com/"
+license=('custom:GPL')
+makedepends=('android-ndk' make)
+options=('!libtool' '!strip' '!buildflags' '!makeflags')
+source=(http://downloads.sourceforge.net/sourceforge/faac/${_pkgname}-${pkgver}.tar.bz2)
+sha1sums=('b0e80481d27ae9faf9e46c8c8dfb617a0adb91b5')
+
+prepare() {
+  cd "${srcdir}/${_pkgname}-${pkgver}"
+  #rm -r "./frontend"
+}
+
+build() {
+  cd "${srcdir}/${_pkgname}-${pkgver}"
+  
+  export NDK=/opt/android-ndk
+  export SYSROOT=$NDK/platforms/android-9/arch-arm
+  export PKG_CONFIG_PATH="${_sysroot}/lib/pkgconfig"
+  export CFLAGS='-march=armv5'
+  export LDFLAGS='-Wl,--fix-cortex-a8'
+  export CXXFLAGS="$CFLAGS -I\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/include\" \
+  -I\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/include\" \
+  -L\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi\""
+  
+  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-x86"
+  export CC="${_toolchainroot}/bin/${_target}-gcc --sysroot=$SYSROOT"
+  export CXX="${_toolchainroot}/bin/${_target}-g++ --sysroot=$SYSROOT"
+  export CPP="${_toolchainroot}/bin/${_target}-cpp --sysroot=$SYSROOT"
+  export STRIP="${_toolchainroot}/bin/${_target}-strip"
+  export AR="${_toolchainroot}/bin/${_target}-ar"
+  export LD="${_toolchainroot}/bin/${_target}-ld"
+  export RANLIB="${_toolchainroot}/bin/${_target}-ranlib"
+  
+  ./configure --prefix="${_sysroot}" --host=arm-linux-gnueabi \
+	--enable-shared --enable-static --with-pic
+  cp ./Makefile ./Makefile.bak
+  sed 's/frontend//' < ./Makefile.bak > Makefile
+  make
+}
+
+package() {
+  cd "${srcdir}/${_pkgname}-${pkgver}"
+  make DESTDIR="$pkgdir" install
+  "$STRIP" "$pkgdir/${_sysroot}/lib/"*.so*
+  install -D -m644 common/mp4ff/mp4ff_int_types.h "${pkgdir}/${_sysroot}/include/mp4ff_int_types.h"
+  #install -D -m644 "${srcdir}/LICENSE"  "${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE"
+}

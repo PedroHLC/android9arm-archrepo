@@ -1,0 +1,48 @@
+# Created by: PedroHLC
+
+_target=arm-linux-androideabi
+_title=android-9-arm
+_sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
+_pkgname=openal
+
+provides="${_title}-${_pkgname}"
+pkgname="${provides}-git"
+pkgver=388
+pkgrel=1
+pkgdesc="A cross-platform 3D audio library (${_target})"
+arch=(any)
+url="http://www.openal.org/"
+license=(LGPL)
+makedepends=('android-ndk' cmake pkgconfig)
+options=('!libtool' '!strip' '!buildflags')
+source=('https://raw.github.com/AerialX/libbricks/master/cmake/toolchain.android.cmake'
+	"${_pkgname}-soft::git+git://github.com/AerialX/openal-soft-android.git")
+md5sums=('7ca71459cf3faacaf0bba33061936bca' SKIP)
+
+prepare() {
+  cd "${srcdir}/$_pkgname-soft"
+  
+  sed 's/set(SUPPORTED_TOOLCHAIN_VERSIONS\ 4.4.0\ 4.4.3\ 4.6.0\ 4.6.1\ 4.6.2\ 4.6.3)/set(SUPPORTED_TOOLCHAIN_VERSIONS\ 4.8)/' < "../../toolchain.android.cmake" > "./toolchain.android.cmake"
+}
+
+build() {
+  cd "${srcdir}/$_pkgname-soft/build"
+  cmake \
+	-D CMAKE_INSTALL_PREFIX="${_sysroot}" \
+	-D CMAKE_BUILD_TYPE=Release \
+	-D EXAMPLES=OFF \
+	-D ANDROID_NDK=/opt/android-ndk \
+	-D ANDROID_API_LEVEL=9 \
+	-D ANDROID_TOOLCHAIN_VERSION=4.8 \
+	-D CMAKE_TOOLCHAIN_FILE=../toolchain.android.cmake \
+	..
+  make
+}
+
+package() {
+  cd "${srcdir}/$_pkgname-soft"
+  make -C build DESTDIR="$pkgdir/" install
+  mkdir -p "${pkgdir}/${_sysroot}/share/openal"
+  install -t "${pkgdir}/${_sysroot}/share/openal" env-vars.txt hrtf.txt
+  rm -r "${pkgdir}/${_sysroot}/bin"
+}

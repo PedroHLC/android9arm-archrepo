@@ -11,7 +11,7 @@ url="http://www.libsdl.org"
 license=('MIT')
 depends=("${_target}-sdl2")
 makedepends=('android-ndk' cmake)
-options=(!libtool)
+options=(staticlibs !strip !buildflags)
 source=("http://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-${pkgver}.tar.gz")
 md5sums=('79787216b56cb4707f39d538f2225e00')
 
@@ -41,8 +41,8 @@ package() {
   cd "${pkgdirfull}"
   mkdir -p "./lib" "./include/SDL2"
   install -m644 "${srcdirfull}/SDL_ttf.h" ./include/SDL2/
-  install -m644 "${srcdirfull}/libs/armeabi/"*.so ./lib/
-  install -m644 "${srcdirfull}/obj/local/armeabi/"libSDL2*.a ./lib/
+  install -m644 "${srcdirfull}/obj/local/armeabi/lib"* ./lib/
+  #install -m644 "${srcdirfull}/libs/armeabi/lib*" ./lib/
 
   #install -Dm644 COPYING.txt "${pkgdirfull}/share/licenses/${_pkgname}/LICENSE"
 }

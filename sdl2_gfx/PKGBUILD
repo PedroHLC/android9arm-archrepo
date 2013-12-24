@@ -3,34 +3,35 @@ _sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
 
 _pkgname=sdl2_gfx
 pkgname=${_target}-${_pkgname}
-pkgver=5
+pkgver=1.0.0
 pkgrel=2
 pkgdesc="A simple multi-channel audio mixer - Version 2 (${_target})"
 arch=('any')
 url="ttp://www.ferzkopp.net/joomla/software-mainmenu-14/4-ferzkopps-linux-software/19-sdlgfx"
 license=('ZLIB')
 depends=("${_target}-sdl2")
-makedepends=('android-ndk' cmake)
-options=(!libtool !strip !buildflags)
-source=("sdl2-gfx::svn://svn.code.sf.net/p/sdl2gfx/code/trunk#revision=$pkgver"
-	'Android.mk')
-md5sums=('SKIP' 'SKIP')
+makedepends=('android-ndk' make)
+options=(staticlibs !strip !buildflags)
+source=("http://downloads.sourceforge.net/project/sdl2gfx/SDL2_gfx-${pkgver}.tar.gz" 'Android.mk')
+md5sums=('f008cc117cb901aec6bf5c2f0b11f7ea' 'SKIP')
 
 prepare() {
   cd "${srcdir}/"
   
+  ln -s "${_sysroot}/include/SDL2/"* "./SDL2_gfx-${pkgver}/" -f
   sed 's/include\ $(BUILD_SHARED_LIBRARY)/include\ $(BUILD_STATIC_LIBRARY)/' < Android.mk > Android_static.mk
 }
 
 build() {
-  cd "${srcdir}/sdl2-gfx/"
+  cd "${srcdir}/SDL2_gfx-${pkgver}/"
   
-  ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=../Android_static.mk APP_PLATFORM=android-9
-  ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=../Android.mk APP_PLATFORM=android-9
+  cp ../Android*.mk ./
+  ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android_static.mk APP_PLATFORM=android-9
+  ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk APP_PLATFORM=android-9
 }
 
 package() {
-  srcdirfull="${srcdir}/sdl2-gfx"
+  srcdirfull="${srcdir}/SDL2_gfx-${pkgver}"
   pkgdirfull="$pkgdir/${_sysroot}"
   
   mkdir -p "${pkgdirfull}"

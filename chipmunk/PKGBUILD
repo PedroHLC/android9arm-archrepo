@@ -7,7 +7,7 @@ _pkgname=chipmunk
 
 pkgname="${_title}-${_pkgname}"
 pkgver=6.2.0
-pkgrel=2
+pkgrel=3
 pkgdesc="A high-performance 2D rigid body physics library (${_target})"
 arch=('any')
 url="http://chipmunk-physics.net/"
@@ -44,7 +44,7 @@ build() {
 		-O3 -DNDEBUG -ffast-math \
 		src/*.c src/constraints/*.c \
 		-c
-	"$AR"  rcs libchipmunk.a ./cp*.o
+	"$AR"  rcs libchipmunk.a ./*.o
 	
 	$CC \
 		-std=gnu99 \
@@ -60,10 +60,10 @@ package() {
 	
 	mkdir -p "./${_sysroot}/lib"
 	mkdir -p "./${_sysroot}/share/doc/chipmunk"
-	cp -r "$srcdir/Chipmunk-$pkgver/include" "./${_sysroot}/"
-	cp -r "$srcdir/Chipmunk-$pkgver/doc" "./${_sysroot}/share/doc/chipmunk/"
+	cp -r "${srcdir}/Chipmunk-$pkgver/include" "./${_sysroot}/"
+	cp -r "${srcdir}/Chipmunk-$pkgver/doc" "./${_sysroot}/share/doc/chipmunk/"
 	mv "./${_sysroot}/share/doc/chipmunk/doc" "./${_sysroot}/share/doc/chipmunk/html/"
-	cp "$srcdir/Chipmunk-$pkgver/libchipmunk.so" "./${_sysroot}/lib/"
-	cp "$srcdir/Chipmunk-$pkgver/libchipmunk.a" "./${_sysroot}/lib/"
+	install -m644 "${srcdir}/Chipmunk-$pkgver/libchipmunk.so" "./${_sysroot}/lib/"
+	install -m644 "${srcdir}/Chipmunk-$pkgver/libchipmunk.a" "./${_sysroot}/lib/"
 	"$STRIP" "./${_sysroot}/lib/"*.so*
 }

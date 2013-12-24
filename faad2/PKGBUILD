@@ -45,7 +45,7 @@ build() {
   
   ./configure --prefix="${_sysroot}" --host=arm-linux-gnueabi \
 	--enable-shared --enable-static --with-pic
-  cp ./Makefile ./Makefile.bak
+  mv ./Makefile ./Makefile.bak
   sed 's/frontend//' < ./Makefile.bak > Makefile
   make
 }

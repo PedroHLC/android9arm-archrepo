@@ -11,7 +11,7 @@ pkgrel=1
 pkgdesc="A portable, high level programming interface to various calling conventions (${_target})"
 arch=('any')
 makedepends=('android-ndk' make)
-options=('!libtool' '!strip' '!buildflags' '!makeflags')
+options=('!libtool' '!strip' '!buildflags' '!makeflags' 'staticlibs')
 license=('MIT')
 url="http://sourceware.org/libffi"
 source=("ftp://sourceware.org/pub/libffi/libffi-${pkgver}.tar.gz")
@@ -33,21 +33,33 @@ build() {
   export LD="${_toolchainroot}/bin/${_target}-ld"
   export RANLIB="${_toolchainroot}/bin/${_target}-ranlib" 
   
-  mkdir -p build && cd build
+  mkdir -p build_static && cd build_static
   ../configure \
       --prefix=${_sysroot} \
-      --host=${_target}
+      --host=${_target} \
+      --enable-static=yes --enable-shared=no
   make
+  
+  mkdir -p ../build && cd ../build
+  ../configure \
+      --prefix=${_sysroot} \
+      --host=${_target} \
+      --enable-static=no --enable-shared=yes
+  make DESTDIR="${srcdir}/${_pkgname}-${pkgver}/build/output" install
 }
 
 package() {
   cd "${srcdir}/${_pkgname}-${pkgver}/build"
   make DESTDIR="${pkgdir}" install
-  rm -r "$pkgdir/${_sysroot}/share/man"
-  mv "$pkgdir/${_sysroot}/lib/${_pkgname}-${pkgver}/include" "$pkgdir/${_sysroot}/"
-  rm -rf "$pkgdir/${_sysroot}/lib/${_pkgname}-${pkgver}"
-  rm "$pkgdir/${_sysroot}/share/info/dir"
-  "$STRIP" "$pkgdir/${_sysroot}/lib/"*.so*
+  
+  cd "${srcdir}/${_pkgname}-${pkgver}/build_static"
+  make DESTDIR="${pkgdir}" install
+  
+  rm -r "${pkgdir}/${_sysroot}/share/man"
+  mv "${pkgdir}/${_sysroot}/lib/${_pkgname}-${pkgver}/include" "${pkgdir}/${_sysroot}/"
+  rm -rf "${pkgdir}/${_sysroot}/lib/${_pkgname}-${pkgver}"
+  rm "${pkgdir}/${_sysroot}/share/info/dir"
+  "$STRIP" "${pkgdir}/${_sysroot}/lib/"*.so*
 }
 
 # vim:set ts=2 sw=2 et:

@@ -14,7 +14,7 @@ url="http://www.xiph.org/vorbis/"
 license=('BSD')
 depends=("${_title}-libogg")
 makedepends=('android-ndk' make)
-options=('!libtool' '!strip' '!buildflags')
+options=('!libtool' '!strip' '!buildflags' staticlibs)
 source=(http://downloads.xiph.org/releases/vorbis/${_pkgname}-${pkgver}.tar.gz)
 md5sums=('6b1a36f0d72332fae5130688e65efe1f')
 

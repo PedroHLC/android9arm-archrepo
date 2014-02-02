@@ -15,7 +15,7 @@ license=('MIT')
 makedepends=('android-ndk' make)
 source=(http://files.slembcke.net/chipmunk/release/Chipmunk-6.x/Chipmunk-${pkgver}.tgz)
 md5sums=('42c63539976b84f5f643fc0acb1b7127')
-options=(!buildflags !strip !makeflags)
+options=(!buildflags !strip !makeflags staticlibs)
 
 build() {
 	cd "${srcdir}/Chipmunk-$pkgver"

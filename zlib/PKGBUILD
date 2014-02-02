@@ -8,7 +8,7 @@ _pkgname=zlib
 
 pkgname="${_title}-${_pkgname}"
 pkgver=1.2.8
-pkgrel=1
+pkgrel=3
 arch=('any')
 license=('custom')
 pkgdesc="A compression/decompression Library (${_target}) - include static and shared librarys"
@@ -18,8 +18,13 @@ provides=("${pkgname}-static")
 conflicts=($provides 'android-ndk')
 url="http://www.zlib.net/"
 source=("http://www.zlib.net/zlib-${pkgver}.tar.gz")
-options=(!strip !buildflags)
+options=(!strip !buildflags staticlibs)
 md5sums=('44d667c142d7cda120332623eab69f40')
+
+prepare() {
+ cd ${srcdir}/zlib-$pkgver
+ grep -A 24 '^ Copyright' zlib.h > LICENSE
+}
 
 build()
 {
@@ -40,8 +45,6 @@ build()
   
   ./configure --prefix=${_sysroot} -static -shared
   make
-
-  grep -A 24 '^  Copyright' zlib.h > LICENSE
 }
 
 package()

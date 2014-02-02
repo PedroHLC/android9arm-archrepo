@@ -4,20 +4,20 @@ _sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
 _pkgname=gettext
 
 pkgname=${_title}-glib2
-pkgver=2.38.0
+pkgver=2.38.2
 pkgrel=1
 arch=(any)
 pkgdesc="Common C routines used by GTK+ and other libs (${_target})"
 depends=(${_title}-gettext ${_title}-libffi)
 makedepends=('android-ndk' python2 automake)
 license=(LGPL)
-options=('!libtool' '!strip' '!buildflags')
+options=('!libtool' '!strip' '!buildflags' 'staticlibs')
 url="http://www.gtk.org/"
 source=(http://ftp.gnome.org/pub/GNOME/sources/glib/${pkgver%.*}/glib-$pkgver.tar.xz
         'revert-warn-glib-compile-schemas.patch'
 	'android_cache.conf'
 	'gdbus_fix.patch')
-md5sums=('c50d2805a76763e9b4cc4385d4ea215d'
+md5sums=('26d1d08e478fc48c181ca8be44f5b69f'
 	'cde8e1a9d18918be0d90af67a981f184'
 	'38aa34dcad8ac26e277b9053bf9f16ee'
 	'fe82e9e8da765a6c4576a7f50b8d1eb4')

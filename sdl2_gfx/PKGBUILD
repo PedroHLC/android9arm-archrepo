@@ -11,7 +11,7 @@ url="ttp://www.ferzkopp.net/joomla/software-mainmenu-14/4-ferzkopps-linux-softwa
 license=('ZLIB')
 depends=("${_target}-sdl2")
 makedepends=('android-ndk' make)
-options=(staticlibs !strip !buildflags)
+options=(staticlibs !strip !buildflags staticlibs)
 source=("http://downloads.sourceforge.net/project/sdl2gfx/SDL2_gfx-${pkgver}.tar.gz" 'Android.mk')
 md5sums=('f008cc117cb901aec6bf5c2f0b11f7ea' 'SKIP')
 

@@ -12,7 +12,7 @@ license=('ZLIB')
 depends=("${_target}-sdl2")
 makedepends=('android-ndk' cmake)
 conflicts=("${_target}-${_pkgname}")
-options=(!libtool !strip !buildflags)
+options=(!libtool !strip !buildflags staticlibs)
 source=("http://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-${pkgver}.tar.gz")
 md5sums=('65f6d80df073a1fb3bb537fbda031b50')
 

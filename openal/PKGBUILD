@@ -14,7 +14,7 @@ arch=(any)
 url="http://www.openal.org/"
 license=(LGPL)
 makedepends=('android-ndk' cmake pkgconfig)
-options=('!libtool' '!strip' '!buildflags')
+options=('!libtool' '!strip' '!buildflags' staticlibs)
 source=('https://raw.github.com/AerialX/libbricks/master/cmake/toolchain.android.cmake'
 	"${_pkgname}-soft::git+git://github.com/AerialX/openal-soft-android.git")
 md5sums=('7ca71459cf3faacaf0bba33061936bca' SKIP)

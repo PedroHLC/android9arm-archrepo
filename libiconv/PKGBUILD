@@ -15,7 +15,7 @@ makedepends=('android-ndk' make)
 license=('LGPL')
 source=("http://ftp.gnu.org/pub/gnu/${_pkgname}/${_pkgname}-${pkgver}.tar.gz")
 md5sums=('e34509b1623cec449dfeb73d7ce9c6c6')
-options=(!strip !buildflags !libtool)
+options=(!strip !buildflags !libtool staticlibs)
 
 prepare() {
   cd "${srcdir}/${_pkgname}-${pkgver}"

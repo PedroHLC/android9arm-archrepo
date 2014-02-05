@@ -1,0 +1,54 @@
+_target=arm-linux-androideabi
+_title=android-9-arm
+_sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
+
+_pkgname=libgee
+pkgname=${_title}-${_pkgname}
+pkgver=0.12.0
+pkgrel=1
+pkgdesc="GObject collection library (${_title})"
+url="http://live.gnome.org/Libgee"
+license=(LGPL2.1)
+arch=(any)
+depends=(${_title}-glib2)
+makedepends=('android-ndk')
+options=(staticlibs !strip !buildflags !makeflags)
+source=(http://ftp.gnome.org/pub/GNOME/sources/$_pkgname/${pkgver%.*}/$_pkgname-$pkgver.tar.xz)
+sha256sums=('d106ed63fe0da5d5ee89aa8197a373cf9a2b96688cc3060144bfc0a022496ea5')
+
+build() {
+  cd $_pkgname-$pkgver
+  
+  export NDK=/opt/android-ndk
+  export SYSROOT=$NDK/platforms/android-9/arch-arm
+  export PKG_CONFIG_PATH="${_sysroot}/lib/pkgconfig"
+  export CFLAGS='-march=armv5' 
+  export LDFLAGS='-Wl,--fix-cortex-a8'
+  
+  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-x86"
+  export CC="${_toolchainroot}/bin/${_target}-gcc --sysroot=$SYSROOT"
+  export STRIP="${_toolchainroot}/bin/${_target}-strip"
+  export AR="${_toolchainroot}/bin/${_target}-ar"
+  export LD="${_toolchainroot}/bin/${_target}-ld"
+  export RANLIB="${_toolchainroot}/bin/${_target}-ranlib" 
+  
+  ./configure \
+      --prefix=${_sysroot} \
+      --host=${_target} \
+      --enable-static \
+      --enable-shared
+  make
+}
+
+check() {
+  cd $_pkgname-$pkgver
+  # generates a bazillion traps - make sure systemd's core_pattern
+  # is deactivated, or you'll DoS the journal and the system
+  #make check
+}
+
+package() {
+  cd $_pkgname-$pkgver
+  make DESTDIR="$pkgdir" install
+  "$STRIP" "$pkgdir/${_sysroot}/lib/"*.so*
+}

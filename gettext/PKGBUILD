@@ -5,8 +5,11 @@ _title=android-9-arm
 _sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
 _pkgname=gettext
 
+_hostarch="$CARCH"
+[ $CARCH == i686 ] && _hostarch="x86"
+
 pkgname="${_title}-${_pkgname}"
-pkgver=0.18.3.2
+pkgver=0.19.2
 pkgrel=1
 arch=(any)
 pkgdesc="GNU internationalization library (${_target})"
@@ -16,7 +19,7 @@ options=(!strip !buildflags !libtool staticlibs)
 license=('GPL' 'LGPL')
 url="http://www.gnu.org/software/gettext/"
 source=("http://ftp.gnu.org/pub/gnu/gettext/gettext-$pkgver.tar.gz"{,.sig} 'msginit_fix.patch')
-md5sums=('241aba309d07aa428252c74b40a818ef' 'SKIP' '679205431aa57ae687035a04cbef1741')
+md5sums=('6898a2fc5d711b17278a59cfbfc10bc5' 'SKIP' '679205431aa57ae687035a04cbef1741')
 
 prepare() {
   cd "$srcdir/gettext-$pkgver/gettext-tools/src/"
@@ -36,7 +39,7 @@ build() {
   -I\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/include\" \
   -L\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi\""
   
-  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-x86"
+  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-${_hostarch}"
   export CC="${_toolchainroot}/bin/${_target}-gcc --sysroot=$SYSROOT"
   export CXX="${_toolchainroot}/bin/${_target}-g++ --sysroot=$SYSROOT"
   export CPP="${_toolchainroot}/bin/${_target}-cpp --sysroot=$SYSROOT"
@@ -62,7 +65,6 @@ package() {
   rm -r "$pkgdir/${_sysroot}/bin"
   rm -r "$pkgdir/${_sysroot}/lib/gettext"
   rm "$pkgdir/${_sysroot}/lib/charset.alias"
-  rm "$pkgdir/${_sysroot}/lib/GNU.Gettext.dll"
   rm "$pkgdir/${_sysroot}/share/info/dir"
   rm -r "$pkgdir/${_sysroot}/share/man"
   "$STRIP" "$pkgdir/${_sysroot}/lib/"*.so*

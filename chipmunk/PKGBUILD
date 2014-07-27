@@ -5,16 +5,19 @@ _title=android-9-arm
 _sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
 _pkgname=chipmunk
 
+_hostarch="$CARCH"
+[ $CARCH == i686 ] && _hostarch="x86"
+
 pkgname="${_title}-${_pkgname}"
-pkgver=6.2.0
-pkgrel=3
+pkgver=6.2.1
+pkgrel=1
 pkgdesc="A high-performance 2D rigid body physics library (${_target})"
 arch=('any')
 url="http://chipmunk-physics.net/"
 license=('MIT')
 makedepends=('android-ndk' make)
-source=(http://files.slembcke.net/chipmunk/release/Chipmunk-6.x/Chipmunk-${pkgver}.tgz)
-md5sums=('42c63539976b84f5f643fc0acb1b7127')
+source=(http://files.slembcke.net/chipmunk/release/Chipmunk-${pkgver%%.*}.x/Chipmunk-${pkgver}.tgz)
+sha256sums=('83a47da80c506541c00e1919c0dc83e5f94d13f6534ae15ad663359c171bc7aa')
 options=(!buildflags !strip !makeflags staticlibs)
 
 build() {
@@ -29,7 +32,7 @@ build() {
   -I\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/include\" \
   -L\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi\""
   
-  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-x86"
+  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-${_hostarch}"
   export CC="${_toolchainroot}/bin/${_target}-gcc --sysroot=$SYSROOT"
   export CXX="${_toolchainroot}/bin/${_target}-g++ --sysroot=$SYSROOT"
   export CPP="${_toolchainroot}/bin/${_target}-cpp --sysroot=$SYSROOT"

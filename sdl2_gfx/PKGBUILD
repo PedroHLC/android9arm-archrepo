@@ -3,8 +3,8 @@ _sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
 
 _pkgname=sdl2_gfx
 pkgname=${_target}-${_pkgname}
-pkgver=1.0.0
-pkgrel=2
+pkgver=1.0.1
+pkgrel=0
 pkgdesc="A simple multi-channel audio mixer - Version 2 (${_target})"
 arch=('any')
 url="ttp://www.ferzkopp.net/joomla/software-mainmenu-14/4-ferzkopps-linux-software/19-sdlgfx"
@@ -13,7 +13,7 @@ depends=("${_target}-sdl2")
 makedepends=('android-ndk' make)
 options=(staticlibs !strip !buildflags staticlibs)
 source=("http://downloads.sourceforge.net/project/sdl2gfx/SDL2_gfx-${pkgver}.tar.gz" 'Android.mk')
-md5sums=('f008cc117cb901aec6bf5c2f0b11f7ea' 'SKIP')
+md5sums=('9c96816618e3e086d885d1d214e59d87' 'b56aa069a58e86932c34b2cc86471859')
 
 prepare() {
   cd "${srcdir}/"

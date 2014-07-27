@@ -2,10 +2,13 @@ _target=arm-linux-androideabi
 _title=android-9-arm
 _sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
 
+_hostarch="$CARCH"
+[ $CARCH == i686 ] && _hostarch="x86"
+
 _pkgname=libgee
 pkgname=${_title}-${_pkgname}
-pkgver=0.12.0
-pkgrel=1
+pkgver=0.15.3
+pkgrel=0
 pkgdesc="GObject collection library (${_title})"
 url="http://live.gnome.org/Libgee"
 license=(LGPL2.1)
@@ -14,7 +17,7 @@ depends=(${_title}-glib2)
 makedepends=('android-ndk')
 options=(staticlibs !strip !buildflags !makeflags)
 source=(http://ftp.gnome.org/pub/GNOME/sources/$_pkgname/${pkgver%.*}/$_pkgname-$pkgver.tar.xz)
-sha256sums=('d106ed63fe0da5d5ee89aa8197a373cf9a2b96688cc3060144bfc0a022496ea5')
+sha256sums=('1c84dc4e0e64af4e628309c94180fbaf9a743ab045c46cb61702c39b25f1b6d4')
 
 build() {
   cd $_pkgname-$pkgver
@@ -25,7 +28,7 @@ build() {
   export CFLAGS='-march=armv5' 
   export LDFLAGS='-Wl,--fix-cortex-a8'
   
-  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-x86"
+  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-${_hostarch}"
   export CC="${_toolchainroot}/bin/${_target}-gcc --sysroot=$SYSROOT"
   export STRIP="${_toolchainroot}/bin/${_target}-strip"
   export AR="${_toolchainroot}/bin/${_target}-ar"

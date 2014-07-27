@@ -5,17 +5,20 @@ _title=android-9-arm
 _sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
 _pkgname=libffi
 
+_hostarch="$CARCH"
+[ $CARCH == i686 ] && _hostarch="x86"
+
 pkgname="${_title}-${_pkgname}"
-pkgver=3.0.13
-pkgrel=1
-pkgdesc="A portable, high level programming interface to various calling conventions (${_target})"
+pkgver=3.1
+pkgrel=2
+pkgdesc="Portable foreign function interface library (${_target})"
 arch=('any')
 makedepends=('android-ndk' make)
-options=('!libtool' '!strip' '!buildflags' '!makeflags' 'staticlibs')
+options=('!strip' '!buildflags' '!makeflags' 'staticlibs')
 license=('MIT')
-url="http://sourceware.org/libffi"
+url='http://sourceware.org/libffi'
 source=("ftp://sourceware.org/pub/libffi/libffi-${pkgver}.tar.gz")
-md5sums=('45f3b6dbc9ee7c7dfbbbc5feba571529')
+md5sums=('f5898b29bbfd70502831a212d9249d10')
 
 build() {
   cd "${srcdir}/${_pkgname}-${pkgver}"
@@ -26,7 +29,7 @@ build() {
   export CFLAGS='-march=armv5' 
   export LDFLAGS='-Wl,--fix-cortex-a8'
   
-  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-x86"
+  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-${_hostarch}"
   export CC="${_toolchainroot}/bin/${_target}-gcc --sysroot=$SYSROOT"
   export STRIP="${_toolchainroot}/bin/${_target}-strip"
   export AR="${_toolchainroot}/bin/${_target}-ar"

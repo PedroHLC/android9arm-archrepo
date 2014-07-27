@@ -7,13 +7,13 @@ pkgver=2.0.0
 pkgrel=2
 pkgdesc="A simple multi-channel audio mixer - Version 2 (${_target})"
 arch=('any')
-url="http://www.libsdl.org/projects/SDL_image/"
+url="http://www.libsdl.org/projects/SDL_mixer"
 license=('ZLIB')
 depends=("${_target}-sdl2")
 makedepends=('android-ndk' cmake)
 conflicts=("${_target}-${_pkgname}")
-options=(!libtool !strip !buildflags staticlibs)
-source=("http://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-${pkgver}.tar.gz")
+options=(!strip !buildflags staticlibs)
+source=("$url/release/SDL2_mixer-${pkgver}.tar.gz")
 md5sums=('65f6d80df073a1fb3bb537fbda031b50')
 
 prepare() {

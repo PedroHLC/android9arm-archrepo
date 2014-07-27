@@ -3,9 +3,12 @@ _title=android-9-arm
 _sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
 _pkgname=gettext
 
+_hostarch="$CARCH"
+[ $CARCH == i686 ] && _hostarch="x86"
+
 pkgname=${_title}-glib2
-pkgver=2.38.2
-pkgrel=1
+pkgver=2.41.2
+pkgrel=0
 arch=(any)
 pkgdesc="Common C routines used by GTK+ and other libs (${_target})"
 depends=(${_title}-gettext ${_title}-libffi)
@@ -14,20 +17,13 @@ license=(LGPL)
 options=('!libtool' '!strip' '!buildflags' 'staticlibs')
 url="http://www.gtk.org/"
 source=(http://ftp.gnome.org/pub/GNOME/sources/glib/${pkgver%.*}/glib-$pkgver.tar.xz
-        'revert-warn-glib-compile-schemas.patch'
-	'android_cache.conf'
-	'gdbus_fix.patch')
-md5sums=('26d1d08e478fc48c181ca8be44f5b69f'
-	'cde8e1a9d18918be0d90af67a981f184'
-	'38aa34dcad8ac26e277b9053bf9f16ee'
-	'fe82e9e8da765a6c4576a7f50b8d1eb4')
+	'android_cache.conf')
+md5sums=('9636f60e99b98fd0fdb5239f905ac008'
+	'38aa34dcad8ac26e277b9053bf9f16ee')
 
 prepare() {
   cd "$srcdir/glib-$pkgver" 
   cp ../android_cache.conf ./ -f
-  patch -Rp1 -i ../revert-warn-glib-compile-schemas.patch
-  cd "./gio"
-  patch -p1 -i "$srcdir/gdbus_fix.patch"
 }
 
 build()
@@ -43,7 +39,7 @@ build()
   -I\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/include\" \
   -L\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi\""
   
-  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-x86"
+  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-${_hostarch}"
   export CC="${_toolchainroot}/bin/${_target}-gcc --sysroot=$SYSROOT"
   export CXX="${_toolchainroot}/bin/${_target}-g++ --sysroot=$SYSROOT"
   export CPP="${_toolchainroot}/bin/${_target}-cpp --sysroot=$SYSROOT"
@@ -51,8 +47,6 @@ build()
   export AR="${_toolchainroot}/bin/${_target}-ar"
   export LD="${_toolchainroot}/bin/${_target}-ld"
   export RANLIB="${_toolchainroot}/bin/${_target}-ranlib"
-  
-  #./autogen.sh
   
   PYTHON="/usr/bin/python2" \
   ./configure \

@@ -6,6 +6,9 @@ _title=android-9-arm
 _sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
 _pkgname=zlib
 
+_hostarch="$CARCH"
+[ $CARCH == i686 ] && _hostarch="x86"
+
 pkgname="${_title}-${_pkgname}"
 pkgver=1.2.8
 pkgrel=3
@@ -36,7 +39,7 @@ build()
   export CFLAGS='-march=armv5' 
   export LDFLAGS='-Wl,--fix-cortex-a8'
   
-  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-x86"
+  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-${_hostarch}"
   export CC="${_toolchainroot}/bin/${_target}-gcc --sysroot=$SYSROOT"
   export STRIP="${_toolchainroot}/bin/${_target}-strip"
   export AR="${_toolchainroot}/bin/${_target}-ar"

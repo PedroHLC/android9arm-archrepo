@@ -5,8 +5,11 @@ _title=android-9-arm
 _sysroot=/opt/android-ndk/platforms/android-9/arch-arm/usr/
 _pkgname=libvorbis
 
+_hostarch="$CARCH"
+[ $CARCH == i686 ] && _hostarch="x86"
+
 pkgname="${_title}-${_pkgname}"
-pkgver=1.3.3
+pkgver=1.3.4
 pkgrel=1
 pkgdesc="Vorbis codec library (${_target})"
 arch=('i686' 'x86_64')
@@ -16,7 +19,7 @@ depends=("${_title}-libogg")
 makedepends=('android-ndk' make)
 options=('!libtool' '!strip' '!buildflags' staticlibs)
 source=(http://downloads.xiph.org/releases/vorbis/${_pkgname}-${pkgver}.tar.gz)
-md5sums=('6b1a36f0d72332fae5130688e65efe1f')
+md5sums=('8851c593a52d1ef9c526d95174873852')
 
 build() {
   cd "${srcdir}/${_pkgname}-${pkgver}"
@@ -30,7 +33,7 @@ build() {
   -I\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/include\" \
   -L\"$NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi\""
   
-  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-x86"
+  export _toolchainroot="$NDK/toolchains/${_target}-4.8/prebuilt/linux-${_hostarch}"
   export CC="${_toolchainroot}/bin/${_target}-gcc --sysroot=$SYSROOT"
   export CXX="${_toolchainroot}/bin/${_target}-g++ --sysroot=$SYSROOT"
   export CPP="${_toolchainroot}/bin/${_target}-cpp --sysroot=$SYSROOT"
